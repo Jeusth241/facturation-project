@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Nouveau Document | Atelier Mobile{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 950px;">
+    <div class="card shadow-sm bg-white p-4">
+        <h3 class="fw-bold mb-4 text-dark">Nouveau Document</h3>
+
+        {% if form.errors or formset.errors %}
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <strong>Erreur de validation :</strong> Veuillez vérifier les champs renseignés ci-dessous.
+                {% if form.errors %}<div class="small mt-1">{{ form.errors }}</div>{% endif %}
+                {% if formset.errors %}<div class="small mt-1">{{ formset.errors }}</div>{% endif %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Informations générales -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">Type de document</label>
+                    {{ form.type_document }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">Structure / Modèle</label>
+                    <select name="modele_facture" id="id_modele_facture" class="form-select fw-bold border-primary">
+                        <option value="service">Prestation (Jours / Taux J.)</option>
+                        <option value="produit">Vente (Qté / Prix Unitaire)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">Numéro</label>
+                    {{ form.numero }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">Initiateur</label>
+                    <input type="text" class="form-control bg-light" value="{{ nom_initiateur }}" readonly>
+                    <input type="hidden" name="initiateur" value="{{ nom_initiateur }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted fs-7">Client</label>
+                    {{ form.client }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted fs-7">Objet</label>
+                    {{ form.objet }}
+                </div>
+            </div>
+
+            <hr class="my-4 text-muted">
+
+            <!-- Dynamic Lignes / Prestations -->
+            <h5 class="fw-bold mb-3 text-dark">Lignes du document</h5>
+            {{ formset.management_form }}
+            <div class="table-responsive mb-3">
+                <table class="table border align-middle" id="items-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 35%;">Désignation</th>
+                            
+                            <!-- En-têtes pour Modèle Prestation -->
+                            <th class="col-prestation" style="width: 15%;">Période</th>
+                            <th class="col-prestation" style="width: 15%;">Nb Jours</th>
+                            <th class="col-prestation" style="width: 15%;">Taux / Prix J.</th>
+                            
+                            <!-- En-têtes pour Modèle Quantité/PU -->
+                            <th class="col-produit d-none" style="width: 20%;">Quantité</th>
+                            <th class="col-produit d-none" style="width: 25%;">Prix Unitaire</th>
+                            
+                            <th style="width: 20%;">Prix Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form_line in formset %}
+                        <tr class="item-row">
+                            <!-- Champ ID requis pour la validation Django -->
+                            {{ form_line.id }}
+
+                            <td>
+                                <input type="text" 
+                                       name="{{ form_line.designation.html_name }}" 
+                                       id="{{ form_line.designation.id_for_label }}" 
+                                       value="{{ form_line.designation.value|default:'' }}" 
+                                       class="form-control" placeholder="Description">
+                            </td>
+                            
+                            <!-- Champs Prestation -->
+                            <td class="col-prestation">
+                                <input type="text" 
+                                       name="{{ form_line.periode.html_name }}" 
+                                       id="{{ form_line.periode.id_for_label }}" 
+                                       value="{{ form_line.periode.value|default:'' }}" 
+                                       class="form-control" placeholder="ex: 01 au 05 Janv">
+                            </td>
+                            <td class="col-prestation">
+                                <input type="number" step="any" 
+                                       name="{{ form_line.nombre_jours.html_name }}" 
+                                       id="{{ form_line.nombre_jours.id_for_label }}" 
+                                       value="{{ form_line.nombre_jours.value|default:'' }}" 
+                                       class="form-control input-nb-jours" placeholder="ex: 5">
+                            </td>
+                            <td class="col-prestation">
+                                <input type="number" step="any" 
+                                       name="{{ form_line.taux_journalier.html_name }}" 
+                                       id="{{ form_line.taux_journalier.id_for_label }}" 
+                                       value="{{ form_line.taux_journalier.value|default:'' }}" 
+                                       class="form-control input-taux" placeholder="18000">
+                            </td>
+                            
+                            <!-- Champs Produit / Vente -->
+                            <td class="col-produit d-none">
+                                <input type="number" step="any" 
+                                       name="{{ form_line.quantite.html_name }}" 
+                                       id="{{ form_line.quantite.id_for_label }}" 
+                                       value="{{ form_line.quantite.value|default:'' }}" 
+                                       class="form-control input-qte" placeholder="1">
+                            </td>
+                            <td class="col-produit d-none">
+                                <input type="number" step="any" 
+                                       name="{{ form_line.prix_unitaire.html_name }}" 
+                                       id="{{ form_line.prix_unitaire.id_for_label }}" 
+                                       value="{{ form_line.prix_unitaire.value|default:'' }}" 
+                                       class="form-control input-pu" placeholder="15000">
+                            </td>
+                            
+                            <td>
+                                <input type="number" step="any" 
+                                       name="{{ form_line.prix_total.html_name }}" 
+                                       id="{{ form_line.prix_total.id_for_label }}" 
+                                       value="{{ form_line.prix_total.value|default:'' }}" 
+                                       class="form-control input-total bg-light" readonly>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <hr class="my-4 text-muted">
+
+            <!-- Options financières -->
+            <h5 class="fw-bold mb-3 text-dark">Options financières</h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted fs-7">Prélèvement (%)</label>
+                    {{ form.taux_prelevement }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted fs-7">Avance (FCFA)</label>
+                    {{ form.avance }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted fs-7">Régule (FCFA)</label>
+                    {{ form.regule }}
+                </div>
+            </div>
+
+            <div class="card p-3 bg-light border mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted fs-7">Autre option (Intitulé)</label>
+                        {{ form.autre_option_label }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted fs-7">Montant (FCFA)</label>
+                        {{ form.autre_option_montant }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'dashboard_index' %}" class="btn btn-light border px-4">Annuler</a>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">Enregistrer & Générer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modeleSelect = document.getElementById('id_modele_facture');
+    
+    function toggleModele() {
+        const mode = modeleSelect.value;
+        const colsPrestation = document.querySelectorAll('.col-prestation');
+        const colsProduit = document.querySelectorAll('.col-produit');
+
+        if (mode === 'produit') {
+            colsPrestation.forEach(el => el.classList.add('d-none'));
+            colsProduit.forEach(el => el.classList.remove('d-none'));
+            
+            // Réinitialiser les champs prestation dissimulés
+            document.querySelectorAll('.input-nb-jours, .input-taux').forEach(input => input.value = '');
+        } else {
+            colsProduit.forEach(el => el.classList.add('d-none'));
+            colsPrestation.forEach(el => el.classList.remove('d-none'));
+            
+            // Réinitialiser les champs produit dissimulés
+            document.querySelectorAll('.input-qte, .input-pu').forEach(input => input.value = '');
+        }
+        recalculerTout();
+    }
+
+    function recalculerLigne(row) {
+        const mode = modeleSelect.value;
+        const totalInput = row.querySelector('.input-total');
+
+        if (mode === 'service') {
+            const nbJours = parseFloat(row.querySelector('.input-nb-jours').value) || 0;
+            const taux = parseFloat(row.querySelector('.input-taux').value) || 0;
+            totalInput.value = (nbJours > 0 && taux > 0) ? (nbJours * taux).toFixed(0) : '';
+        } else {
+            const qte = parseFloat(row.querySelector('.input-qte').value) || 0;
+            const pu = parseFloat(row.querySelector('.input-pu').value) || 0;
+            totalInput.value = (qte > 0 && pu > 0) ? (qte * pu).toFixed(0) : '';
+        }
+    }
+
+    function recalculerTout() {
+        document.querySelectorAll('.item-row').forEach(recalculerLigne);
+    }
+
+    modeleSelect.addEventListener('change', toggleModele);
+
+    document.querySelectorAll('.item-row').forEach(row => {
+        row.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => recalculerLigne(row));
+        });
+    });
+
+    toggleModele();
+});
+</script>
+{% endblock %}

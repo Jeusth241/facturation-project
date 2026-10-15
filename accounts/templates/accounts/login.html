@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion | MP-Facturie{% endblock %}
+
+{% block content %}
+<style>
+    /* Fond avec l'image static/facture.jpg couvrant tout l'écran */
+    body {
+        background: url("{% static 'facture.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    .login-wrapper {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Carte de connexion semi-transparente */
+    .login-card {
+        max-width: 440px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(5px);
+        border-radius: 16px;
+    }
+
+    /* Logo grand et bien collé au titre */
+    .login-logo {
+        max-width: 260px;
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: -10px auto -32px auto; /* Marge négative augmentée en bas */
+        object-fit: contain;
+    }
+
+    .brand-title {
+        margin-top: -15px; /* Tire le titre vers le haut pour le coller au logo */
+        position: relative;
+        z-index: 2;
+    }
+</style>
+
+<div class="container login-wrapper">
+    <div class="card shadow-lg p-4 border-0 login-card text-center">
+        <!-- Logo très grand et collé au texte -->
+        <img src="{% static 'logo.png' %}" alt="Logo MP-Facturie" class="login-logo">
+
+        <h3 class="fw-bold text-primary brand-title mb-0">MP-Facturie</h3>
+        <h5 class="text-muted mb-4 fs-6">Espace de connexion</h5>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show p-2 fs-7 text-start" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close p-2" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.errors and not messages %}
+            <div class="alert alert-danger p-2 fs-7 mb-3 text-start">
+                Identifiant ou mot de passe incorrect.
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}" class="text-start">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nom d'utilisateur</label>
+                <input type="text" name="username" class="form-control" placeholder="Entrez votre identifiant" required autofocus>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Mot de passe</label>
+                <input type="password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mt-2">Se connecter</button>
+        </form>
+
+        <div class="text-center mt-3 pt-2 border-top">
+            <span class="text-muted small">Pas encore de compte ?</span>
+            <a href="{% url 'register' %}" class="fw-bold text-decoration-none ms-1">Créer un compte</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MP-Facturie{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .content-wrapper {
+            flex: 1;
+        }
+        footer {
+            background-color: #111827;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barre de Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold text-primary fs-4" href="{% url 'dashboard_index' %}">MP-Facturie</a>
+            
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <a href="{% url 'dashboard_index' %}" class="btn btn-outline-light btn-sm">Tableau de bord</a>
+                <a href="{% url 'liste_documents' %}" class="btn btn-outline-light btn-sm">Tous les documents</a>
+                <a href="{% url 'creer_document' %}" class="btn btn-primary btn-sm fw-bold">+ Nouveau Document</a>
+                
+                <span class="text-light ms-2"><i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Déconnexion</button>
+                </form>
+            </div>
+            {% else %}
+            <!-- Sur la page de connexion, la navigation standard est masquée -->
+            <div class="ms-auto d-flex gap-2">
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">Se connecter</a>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Créer un compte</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="content-wrapper py-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer commun sur toutes les pages -->
+    <footer class="mt-auto py-3 border-top">
+        <div class="container text-center">
+            <p class="mb-1 fw-bold text-white">MP-Facturie &copy; 2026 - Système de Gestion Documentaire</p>
+            <p class="small mb-0">Gestion centralisée des Devis, Factures et Bons de Livraison.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
