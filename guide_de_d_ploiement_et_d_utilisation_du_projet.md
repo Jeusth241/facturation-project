@@ -4,7 +4,7 @@ Application web Django permettant la création, le calcul et la génération aut
 
 ---
 
-## 🚀 Fonctionnalités
+## Fonctionnalités
 
 - **Gestion des factures** : Formulaire dynamique pour la création de factures de prestation de services ou de vente de produits.
 - **Calculs automatiques** : Montants HT, TTC, prélèvements, avances, régulations et conversion du net à payer en lettres (`num2words`).
@@ -15,14 +15,14 @@ Application web Django permettant la création, le calcul et la génération aut
 
 ---
 
-## 🛠️ Prérequis
+## Prérequis
 
 1. **Python 3.10+**
 2. **LibreOffice** ou **Microsoft Word** (nécessaire sur le système pour la conversion automatique des fichiers `.docx` en `.pdf`).
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### 1. Cloner le projet et créer un environnement virtuel
 ```bash
@@ -45,7 +45,7 @@ python manage.py migrate
 
 ---
 
-## 📄 Génération des modèles Word de base
+##  Génération des modèles Word de base
 
 Avant de lancer la création de documents, exécutez le script de réinitialisation pour générer les templates `.docx` neutres (sans fioritures de mise en page) :
 
@@ -59,7 +59,7 @@ Ce script va créer deux fichiers simples dans `templates/docx/` :
 
 ---
 
-## 🚀 Lancement de l'application
+## Lancement de l'application
 
 Lancez le serveur de développement Django :
 

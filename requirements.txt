@@ -1,31 +1,8 @@
-# Django Framework
-
-Django>=4.2.0,<5.1.0
-
-
-
-# Traitement des fichiers Word / Templates Jinja2
-
-python-docx>=0.8.11
-
-docxtpl>=0.16.0
-
-jinja2>=3.1.0
-
-
-
-# Conversion Word vers PDF (Windows - LibreOffice / Word / docx2pdf)
-
-docx2pdf>=0.1.8
-
-
-
-# Conversion de montants en lettres
-
-num2words>=0.5.12
-
-
-
-# Utilitaires de base
-
-pillow>=10.0.0
+Django>=4.2,<6.0
+python-docx
+docxtpl
+docx2pdf
+pypdf
+reportlab
+num2words
+pywin32
