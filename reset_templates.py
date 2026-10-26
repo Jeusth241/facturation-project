@@ -7,21 +7,38 @@ from docx.shared import Inches, Pt, RGBColor
 TEMPLATE_DIR = os.path.join("templates", "docx")
 os.makedirs(TEMPLATE_DIR, exist_ok=True)
 
-# Emplacement exact de votre logo (templates/docx/logo_perso.png)
 LOGO_PATH = os.path.join(TEMPLATE_DIR, "logo_perso.png")
 
 
 def ajuster_marges_page(doc):
-  """Rédut les marges de la page A4 (1.5 cm) pour faire remonter tout le contenu vers le haut."""
+  """Réduit les marges de la page A4 pour faire remonter le contenu."""
   for section in doc.sections:
-    section.top_margin = Inches(0.6)  # ~1.5 cm du haut
+    section.top_margin = Inches(0.5)
     section.bottom_margin = Inches(0.8)
     section.left_margin = Inches(0.8)
     section.right_margin = Inches(0.8)
 
+    # Ajout du pied de page officiel
+    footer = section.footer
+    p_footer = (
+        footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
+    )
+    p_footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_footer = p_footer.add_run(
+        "Atelier Mobile Mécanique Générale — Adresse : Zone du PK9 derrière le"
+        " lycée Classique, BP 129\n"
+        "Tél. : (+241) 62.70.55.62 / 77.93.98.66 — N° RCCM :"
+        " GA-LBV-01-2020-A10-02435 — N° NIF : 315548 R\n"
+        "UBA N° : 80901600302 — Capital : 2.000.000 F CFA — Site Internet :"
+        " mobileateliermou.wixsite.com/website"
+    )
+    run_footer.font.name = "Times New Roman"
+    run_footer.font.size = Pt(8.5)
+    run_footer.font.color.rgb = RGBColor(80, 80, 80)
+
 
 def ajouter_logo_et_en_tete(doc):
-  """Insère le logo à gauche et la date/numéro à droite tout en haut."""
+  """Logo à gauche et uniquement la Date à droite."""
   header_table = doc.add_table(rows=1, cols=2)
   header_table.alignment = WD_TABLE_ALIGNMENT.CENTER
   header_table.autofit = False
@@ -44,27 +61,24 @@ def ajouter_logo_et_en_tete(doc):
   p_right.paragraph_format.space_before = Pt(0)
   p_right.paragraph_format.space_after = Pt(0)
 
-  run_date = p_right.add_run("Date : {{ date_facture }}\n")
+  run_date = p_right.add_run("Date : {{ date_facture }}")
   run_date.bold = True
-  run_num = p_right.add_run("N° {{ type_doc }} : {{ numero_facture }}")
-  run_num.bold = True
 
 
-def ajouter_titre_centre(doc, suffixe=""):
-  """Grand titre centré avec un espacement réduit."""
+def ajouter_titre_centre(doc):
+  """Affiche le titre dynamique (ex: FACTURE N° : 1400500)."""
   p_titre = doc.add_paragraph()
   p_titre.alignment = WD_ALIGN_PARAGRAPH.CENTER
-  p_titre.paragraph_format.space_before = Pt(8)
-  p_titre.paragraph_format.space_after = Pt(8)
+  p_titre.paragraph_format.space_before = Pt(10)
+  p_titre.paragraph_format.space_after = Pt(10)
 
-  run_titre = p_titre.add_run(f"{{{{ type_doc }}}} {suffixe}".strip())
-  run_titre.font.size = Pt(20)
+  run_titre = p_titre.add_run("{{ titre_principal }}")
+  run_titre.font.size = Pt(18)
   run_titre.font.bold = True
   run_titre.font.color.rgb = RGBColor(31, 78, 121)
 
 
 def ajouter_bloc_client(doc):
-  """Informations client compactes."""
   p = doc.add_paragraph()
   p.paragraph_format.space_before = Pt(6)
   p.paragraph_format.space_after = Pt(4)
@@ -103,7 +117,7 @@ def generer_template_service():
   ajuster_marges_page(doc)
 
   ajouter_logo_et_en_tete(doc)
-  ajouter_titre_centre(doc, "DE SERVICE")
+  ajouter_titre_centre(doc)
   ajouter_bloc_client(doc)
 
   table = doc.add_table(rows=1, cols=4)
@@ -150,7 +164,7 @@ def generer_template_service():
 
   filepath = os.path.join(TEMPLATE_DIR, "Facture_Atelier_Mobile.docx")
   doc.save(filepath)
-  print(f"Template Service réajusté vers le haut : {filepath}")
+  print(f"Template Service mis à jour : {filepath}")
 
 
 def generer_template_produit():
@@ -158,7 +172,7 @@ def generer_template_produit():
   ajuster_marges_page(doc)
 
   ajouter_logo_et_en_tete(doc)
-  ajouter_titre_centre(doc, "DE VENTE PRODUITS")
+  ajouter_titre_centre(doc)
   ajouter_bloc_client(doc)
 
   table = doc.add_table(rows=1, cols=4)
@@ -205,7 +219,7 @@ def generer_template_produit():
 
   filepath = os.path.join(TEMPLATE_DIR, "Facture_Vente_Atelier_Mobile.docx")
   doc.save(filepath)
-  print(f"Template Produit réajusté vers le haut : {filepath}")
+  print(f"Template Produit mis à jour : {filepath}")
 
 
 if __name__ == "__main__":
