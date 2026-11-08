@@ -12,7 +12,7 @@ SECRET_KEY = 'django-insecure-_g0=0m1st71ii59fq2-i&3&kc+kq!v&##2vh2lwkla8y^j=26)
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['facturation-project.onrender.com', 'localhost', '127.0.0.1']
 
 # Applications installées
 INSTALLED_APPS = [
