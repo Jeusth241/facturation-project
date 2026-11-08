@@ -1,5 +1,6 @@
 import os
 import pythoncom  # Nécessaire pour éviter l'erreur CoInitialize sous Windows
+from django.core.paginator import Paginator  # <-- Ajouté pour la pagination
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404
 from django.contrib.auth.decorators import login_required
@@ -12,7 +13,6 @@ from .utils import generer_pdf_document
 @login_required
 def liste_documents(request):
     documents = Document.objects.filter(user=request.user)
-
     search_query = request.GET.get('q', '').strip()
     type_doc = request.GET.get('type', '')
     date_debut = request.GET.get('date_debut', '')
@@ -45,8 +45,15 @@ def liste_documents(request):
 
     documents = documents.order_by('-date_creation')
 
+    # --- CONFIGURATION DE LA PAGINATION ---
+    paginator = Paginator(documents, 10)  # 10 documents par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # -------------------------------------
+
     return render(request, 'documents/liste_documents.html', {
-        'documents': documents,
+        'page_obj': page_obj,          # On passe l'objet page au lieu de 'documents' brut
+        'documents': page_obj,         # Gardé pour la compatibilité avec la boucle du template
         'search_query': search_query,
         'type_doc': type_doc,
         'date_debut': date_debut,
@@ -94,7 +101,6 @@ def creer_document(request):
 
             return redirect('dashboard_index')
         else:
-            # Traçabilité des erreurs dans la console terminal si la validation échoue
             print("--- ERREURS DU FORMULAIRE PRINCIPAL ---", form.errors)
             print("--- ERREURS DU FORMSET (LIGNES) ---", formset.errors)
     else:

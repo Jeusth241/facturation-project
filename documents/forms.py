@@ -15,12 +15,14 @@ class DocumentForm(forms.ModelForm):
 
     class Meta:
         model = Document
-        fields = ['type_document', 'numero', 'initiateur', 'client', 'objet', 'taux_prelevement', 'avance', 'regule']
+        fields = ['type_document', 'numero', 'initiateur', 'client', 'nif', 'bp', 'objet', 'taux_prelevement', 'avance', 'regule']
         widgets = {
             'type_document': forms.Select(attrs={'class': 'form-select'}),
             'numero': forms.TextInput(attrs={'class': 'form-control'}),
             'initiateur': forms.TextInput(attrs={'class': 'form-control'}),
-            'client': forms.TextInput(attrs={'class': 'form-control'}),
+            'client': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom du client'}),
+            'nif': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: 315548R'}),
+            'bp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: 129'}),
             'objet': forms.TextInput(attrs={'class': 'form-control'}),
             'taux_prelevement': forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'}),
             'avance': forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'}),
@@ -51,7 +53,6 @@ class LigneDocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Rendre tous les champs sauf 'designation' optionnels pour ne pas bloquer la validation
         self.fields['designation'].required = True
         self.fields['periode'].required = False
         self.fields['nombre_jours'].required = False

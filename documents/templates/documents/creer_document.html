@@ -41,11 +41,22 @@
                     <input type="text" class="form-control bg-light" value="{{ nom_initiateur }}" readonly>
                     <input type="hidden" name="initiateur" value="{{ nom_initiateur }}">
                 </div>
+                
+                <!-- Client, NIF et BP -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted fs-7">Client</label>
                     {{ form.client }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">NIF</label>
+                    {{ form.nif }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted fs-7">Boîte Postale (BP)</label>
+                    {{ form.bp }}
+                </div>
+
+                <div class="col-md-12">
                     <label class="form-label fw-bold text-muted fs-7">Objet</label>
                     {{ form.objet }}
                 </div>
@@ -54,30 +65,36 @@
             <hr class="my-4 text-muted">
 
             <!-- Dynamic Lignes / Prestations -->
-            <h5 class="fw-bold mb-3 text-dark">Lignes du document</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0 text-dark">Lignes du document</h5>
+                <button type="button" id="add-item-btn" class="btn btn-sm btn-outline-primary fw-bold">
+                    <i class="bi bi-plus-lg"></i> + Ajouter une ligne
+                </button>
+            </div>
+
             {{ formset.management_form }}
             <div class="table-responsive mb-3">
                 <table class="table border align-middle" id="items-table">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 35%;">Désignation</th>
+                            <th style="width: 33%;">Désignation</th>
                             
                             <!-- En-têtes pour Modèle Prestation -->
-                            <th class="col-prestation" style="width: 15%;">Période</th>
-                            <th class="col-prestation" style="width: 15%;">Nb Jours</th>
+                            <th class="col-prestation" style="width: 14%;">Période</th>
+                            <th class="col-prestation" style="width: 13%;">Nb Jours</th>
                             <th class="col-prestation" style="width: 15%;">Taux / Prix J.</th>
                             
                             <!-- En-têtes pour Modèle Quantité/PU -->
                             <th class="col-produit d-none" style="width: 20%;">Quantité</th>
-                            <th class="col-produit d-none" style="width: 25%;">Prix Unitaire</th>
+                            <th class="col-produit d-none" style="width: 22%;">Prix Unitaire</th>
                             
-                            <th style="width: 20%;">Prix Total</th>
+                            <th style="width: 18%;">Prix Total</th>
+                            <th style="width: 7%; text-align: center;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for form_line in formset %}
                         <tr class="item-row">
-                            <!-- Champ ID requis pour la validation Django -->
                             {{ form_line.id }}
 
                             <td>
@@ -94,7 +111,7 @@
                                        name="{{ form_line.periode.html_name }}" 
                                        id="{{ form_line.periode.id_for_label }}" 
                                        value="{{ form_line.periode.value|default:'' }}" 
-                                       class="form-control" placeholder="ex: 01 au 05 Janv">
+                                       class="form-control" placeholder="ex: 01 au 05">
                             </td>
                             <td class="col-prestation">
                                 <input type="number" step="any" 
@@ -133,6 +150,12 @@
                                        id="{{ form_line.prix_total.id_for_label }}" 
                                        value="{{ form_line.prix_total.value|default:'' }}" 
                                        class="form-control input-total bg-light" readonly>
+                            </td>
+
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="Supprimer la ligne">
+                                    <i class="bi bi-trash"></i> &times;
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -185,7 +208,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modeleSelect = document.getElementById('id_modele_facture');
-    
+    const tableBody = document.querySelector('#items-table tbody');
+    const addButton = document.getElementById('add-item-btn');
+    const totalFormsInput = document.getElementById('id_lignes-TOTAL_FORMS');
+
     function toggleModele() {
         const mode = modeleSelect.value;
         const colsPrestation = document.querySelectorAll('.col-prestation');
@@ -194,15 +220,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mode === 'produit') {
             colsPrestation.forEach(el => el.classList.add('d-none'));
             colsProduit.forEach(el => el.classList.remove('d-none'));
-            
-            // Réinitialiser les champs prestation dissimulés
-            document.querySelectorAll('.input-nb-jours, .input-taux').forEach(input => input.value = '');
         } else {
             colsProduit.forEach(el => el.classList.add('d-none'));
             colsPrestation.forEach(el => el.classList.remove('d-none'));
-            
-            // Réinitialiser les champs produit dissimulés
-            document.querySelectorAll('.input-qte, .input-pu').forEach(input => input.value = '');
         }
         recalculerTout();
     }
@@ -226,6 +246,70 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.item-row').forEach(recalculerLigne);
     }
 
+    addButton.addEventListener('click', function() {
+        let formCount = parseInt(totalFormsInput.value);
+        const firstRow = tableBody.querySelector('.item-row');
+        if (!firstRow) return;
+        const newRow = firstRow.cloneNode(true);
+
+        newRow.querySelectorAll('input').forEach(input => {
+            input.value = '';
+            if (input.name) {
+                input.name = input.name.replace(/-\d+-/, `-${formCount}-`);
+            }
+            if (input.id) {
+                input.id = input.id.replace(/-\d+-/, `-${formCount}-`);
+            }
+        });
+
+        newRow.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => recalculerLigne(newRow));
+        });
+
+        const removeBtn = newRow.querySelector('.remove-row-btn');
+        removeBtn.addEventListener('click', function() {
+            if (document.querySelectorAll('.item-row').length > 1) {
+                newRow.remove();
+                mettreAJourIndiceFormset();
+            } else {
+                alert("Le document doit contenir au moins une ligne.");
+            }
+        });
+
+        tableBody.appendChild(newRow);
+        totalFormsInput.value = formCount + 1;
+        toggleModele();
+    });
+
+    function attacherEvenementsSuppression() {
+        document.querySelectorAll('.remove-row-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = btn.closest('.item-row');
+                if (document.querySelectorAll('.item-row').length > 1) {
+                    row.remove();
+                    mettreAJourIndiceFormset();
+                } else {
+                    alert("Le document doit contenir au moins une ligne.");
+                }
+            });
+        });
+    }
+
+    function mettreAJourIndiceFormset() {
+        const rows = document.querySelectorAll('.item-row');
+        totalFormsInput.value = rows.length;
+        rows.forEach((row, index) => {
+            row.querySelectorAll('input').forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(/-\d+-/, `-${index}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(/-\d+-/, `-${index}-`);
+                }
+            });
+        });
+    }
+
     modeleSelect.addEventListener('change', toggleModele);
 
     document.querySelectorAll('.item-row').forEach(row => {
@@ -234,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    attacherEvenementsSuppression();
     toggleModele();
 });
 </script>

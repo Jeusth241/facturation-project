@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Tous les documents | Atelier Mobile{% endblock %}
+{% block title %}toms les documents | Atelier Mobile{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-2">
@@ -57,7 +57,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for doc in documents %}
+                        {% for doc in page_obj %}
                         <tr>
                             <td class="ps-4 fw-bold text-dark">{{ doc.numero }}</td>
                             <td>
@@ -87,5 +87,53 @@
             </div>
         </div>
     </div>
+
+    <!-- Barre de Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Navigation des pages" class="d-flex justify-content-center mt-4">
+        <ul class="pagination shadow-sm bg-white p-2 rounded">
+            
+            <!-- Indicateur "Page X of Y" -->
+            <li class="page-item disabled me-2">
+                <span class="page-link border-0 bg-light text-dark fw-bold">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            <!-- Première page si on est loin -->
+            {% if page_obj.number > 3 %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if type_doc %}&type={{ type_doc }}{% endif %}">1</a></li>
+                {% if page_obj.number > 4 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endif %}
+
+            <!-- Pages autour de la page courante -->
+            {% for num in page_obj.paginator.page_range %}
+                {% if num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link fw-bold border-dark bg-secondary text-white">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link text-dark" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if type_doc %}&type={{ type_doc }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            <!-- Points de suspension et Dernière page -->
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link text-dark" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if type_doc %}&type={{ type_doc }}{% endif %}">
+                        Last »
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+    {% endif %}
+
 </div>
 {% endblock %}

@@ -6,3 +6,4 @@ pypdf
 reportlab
 num2words
 pywin32
+paginator

@@ -7,14 +7,12 @@ from pathlib import Path
 # Path racine du projet
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Paramètres de sécurité pour le développement
 SECRET_KEY = 'django-insecure-_g0=0m1st71ii59fq2-i&3&kc+kq!v&##2vh2lwkla8y^j=26)'
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Applications installées
 INSTALLED_APPS = [
@@ -61,15 +59,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'facturation_project.wsgi.application'
 
-
-# Base de données (SQLite en local)
+# Base de données PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'facturation_db',        # Le nom de la base de données que vous allez créer dans Postgres
+        'USER': 'postgres',              # Votre nom d'utilisateur PostgreSQL (souvent 'postgres' par défaut)
+        'PASSWORD': 'jeusth', # Le mot de passe que vous avez défini lors de l'installation de Postgres
+        'HOST': 'localhost',             # L'adresse du serveur (localhost si c'est sur votre PC)
+        'PORT': '5432',                  # Le port par défaut de PostgreSQL
     }
 }
-
 
 # Validation des mots de passe
 AUTH_PASSWORD_VALIDATORS = [
@@ -87,7 +87,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalisation (Passage en français)
 LANGUAGE_CODE = 'fr-fr'
 
@@ -97,7 +96,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Fichiers Statiques (CSS, JS)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -106,16 +104,10 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-
 # Redirections Authentification
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard_index'
 LOGOUT_REDIRECT_URL = 'login'
 
-
-# Configuration Email
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Configuration Email (Standard Django)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

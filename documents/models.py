@@ -19,6 +19,11 @@ class Document(models.Model):
     numero = models.CharField(max_length=50)
     initiateur = models.CharField(max_length=100, blank=True)
     client = models.CharField(max_length=100)
+    
+    # Nouveaux champs dynamiques
+    nif = models.CharField(max_length=50, blank=True, null=True, verbose_name="NIF")
+    bp = models.CharField(max_length=50, blank=True, null=True, verbose_name="Boîte Postale (BP)")
+    
     objet = models.CharField(max_length=255, blank=True)
     
     taux_prelevement = models.FloatField(default=0.0)
@@ -30,7 +35,6 @@ class Document(models.Model):
     
     date_creation = models.DateTimeField(auto_now_add=True)
 
-from django.db import models
 
 class LigneDocument(models.Model):
     document = models.ForeignKey('Document', related_name='lignes', on_delete=models.CASCADE)
