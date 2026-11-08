@@ -4,6 +4,6 @@ docxtpl
 docx2pdf
 pypdf
 reportlab
-num2words
-pywin32
+num2words 
+
 paginator
