@@ -1,5 +1,10 @@
 import os
-import pythoncom  # Nécessaire pour éviter l'erreur CoInitialize sous Windows
+import sys
+
+# Importation conditionnelle de pythoncom (uniquement sous Windows pour le développement)
+if sys.platform == "win32":
+    import pythoncom
+
 from django.core.paginator import Paginator  # <-- Ajouté pour la pagination
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import FileResponse, Http404
@@ -52,7 +57,7 @@ def liste_documents(request):
     # -------------------------------------
 
     return render(request, 'documents/liste_documents.html', {
-        'page_obj': page_obj,          # On passe l'objet page au lieu de 'documents' brut
+        'page_obj': page_obj,           # On passe l'objet page au lieu de 'documents' brut
         'documents': page_obj,         # Gardé pour la compatibilité avec la boucle du template
         'search_query': search_query,
         'type_doc': type_doc,
