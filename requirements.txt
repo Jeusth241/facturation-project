@@ -5,7 +5,5 @@ docx2pdf
 pypdf
 reportlab
 num2words 
-
+pywin32
 paginator
-gunicorn
-psycopg2-binary
